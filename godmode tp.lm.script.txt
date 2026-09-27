@@ -1,0 +1,306 @@
+-- // ZEN-HUBv10 + Godmode (Fixed Border LED Red-White)
+-- // Refactored by Axiom for Boss Man
+
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Workspace = game:GetService("Workspace")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Prevent duplicate UI instances
+if CoreGui:FindFirstChild("ZenHub_Final") then
+    CoreGui.ZenHub_Final:Destroy()
+end
+if PlayerGui:FindFirstChild("ZenHub_Final") then
+    PlayerGui.ZenHub_Final:Destroy()
+end
+
+local MasterGui = Instance.new("ScreenGui")
+MasterGui.Name = "ZenHub_Final"
+MasterGui.Parent = CoreGui
+MasterGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+MasterGui.ResetOnSpawn = false
+
+-- --- FLOATING OPEN/CLOSE TOGGLE BUTTON ---
+local OpenBtn = Instance.new("ImageButton")
+OpenBtn.Name = "FloatingBtn"
+OpenBtn.Parent = MasterGui
+OpenBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+OpenBtn.Position = UDim2.new(0.05, 0, 0.4, 0)
+OpenBtn.Size = UDim2.new(0, 44, 0, 44)
+OpenBtn.Image = "rbxassetid://124726777772489"
+OpenBtn.Active = true
+OpenBtn.Draggable = true
+OpenBtn.BorderSizePixel = 0
+
+local OpenBtnCorner = Instance.new("UICorner", OpenBtn)
+OpenBtnCorner.CornerRadius = UDim.new(0, 10)
+
+-- Running Border Container for OpenBtn
+local OpenBorderContainer = Instance.new("Frame")
+OpenBorderContainer.Name = "BorderContainer"
+OpenBorderContainer.Parent = OpenBtn
+OpenBorderContainer.BackgroundTransparency = 1
+OpenBorderContainer.Position = UDim2.new(0, -2, 0, -2)
+OpenBorderContainer.Size = UDim2.new(1, 4, 1, 4)
+OpenBorderContainer.ZIndex = 0
+
+local OpenBorderCorner = Instance.new("UICorner", OpenBorderContainer)
+OpenBorderCorner.CornerRadius = UDim.new(0, 12)
+
+local OpenUIStroke = Instance.new("UIStroke", OpenBorderContainer)
+OpenUIStroke.Thickness = 2
+OpenUIStroke.Color = Color3.fromRGB(255, 255, 255)
+
+local OpenUIGradient = Instance.new("UIGradient", OpenUIStroke)
+OpenUIGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
+})
+
+task.spawn(function()
+    local rot = 0
+    while MasterGui.Parent do
+        rot = (rot + 2) % 360
+        OpenUIGradient.Rotation = rot
+        task.wait(0.03)
+    end
+end)
+
+-- --- MAIN WRAPPER (CHỨA VIỀN LED VÀ HIỆU NỨNG BẬT NẢY CAO SU) ---
+local MainWrapper = Instance.new("Frame")
+MainWrapper.Name = "MainWrapper"
+MainWrapper.Parent = MasterGui
+MainWrapper.BackgroundTransparency = 1
+MainWrapper.Position = UDim2.new(0.15, 0, 0.3, 0)
+MainWrapper.Size = UDim2.new(0, 220, 0, 150)
+MainWrapper.Visible = false
+MainWrapper.Active = true
+MainWrapper.Draggable = true
+
+local MainScale = Instance.new("UIScale", MainWrapper)
+MainScale.Scale = 0
+
+-- --- GLOWING RUNNING BORDER CONTAINER (ĐẶT Ở WRAPPER ĐỂ KHÔNG BỊ MẤT VIỀN) ---
+local BorderContainer = Instance.new("Frame")
+BorderContainer.Name = "BorderContainer"
+BorderContainer.Parent = MainWrapper
+BorderContainer.BackgroundTransparency = 1
+BorderContainer.Position = UDim2.new(0, -2, 0, -2)
+BorderContainer.Size = UDim2.new(1, 4, 1, 4)
+BorderContainer.ZIndex = 0
+
+local BorderCorner = Instance.new("UICorner", BorderContainer)
+BorderCorner.CornerRadius = UDim.new(0, 10)
+
+local UIStroke = Instance.new("UIStroke", BorderContainer)
+UIStroke.Thickness = 2
+UIStroke.Color = Color3.fromRGB(255, 255, 255)
+
+local UIGradient = Instance.new("UIGradient", UIStroke)
+UIGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255, 0, 0))
+})
+
+task.spawn(function()
+    local rot = 0
+    while MasterGui.Parent do
+        rot = (rot + 2) % 360
+        UIGradient.Rotation = rot
+        task.wait(0.03)
+    end
+end)
+
+-- --- MAIN FRAME (GIAO DIỆN CHÍNH BÊN TRONG) ---
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = MainWrapper
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+MainFrame.Size = UDim2.new(1, 0, 1, 0)
+MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
+MainFrame.ZIndex = 2
+
+local UICorner = Instance.new("UICorner", MainFrame)
+UICorner.CornerRadius = UDim.new(0, 8)
+
+-- --- HIỆU ỨNG VỆT SÁNG CHẠY NGANG (SHIMMER EFFECT) ---
+local ShimmerEffect = Instance.new("Frame", MainFrame)
+ShimmerEffect.Name = "ShimmerEffect"
+ShimmerEffect.Size = UDim2.new(0, 60, 2, 0)
+ShimmerEffect.Position = UDim2.new(-0.5, 0, -0.5, 0)
+ShimmerEffect.Rotation = 25
+ShimmerEffect.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ShimmerEffect.BackgroundTransparency = 0.85
+ShimmerEffect.BorderSizePixel = 0
+ShimmerEffect.ZIndex = 3
+
+local ShimmerGradient = Instance.new("UIGradient", ShimmerEffect)
+ShimmerGradient.Transparency = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 1),
+    NumberSequenceKeypoint.new(0.5, 0.3),
+    NumberSequenceKeypoint.new(1, 1)
+})
+
+task.spawn(function()
+    while MasterGui.Parent do
+        ShimmerEffect.Position = UDim2.new(-0.5, 0, -0.5, 0)
+        TweenService:Create(ShimmerEffect, TweenInfo.new(1.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+            Position = UDim2.new(1.5, 0, 0.5, 0)
+        }):Play()
+        task.wait(3.5)
+    end
+end)
+
+-- Close Button
+local CloseBtn = Instance.new("TextButton", MainFrame)
+CloseBtn.Size = UDim2.new(0, 24, 0, 24)
+CloseBtn.Position = UDim2.new(1, -26, 0, 4)
+CloseBtn.BackgroundTransparency = 1
+CloseBtn.Text = "×"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 18
+CloseBtn.ZIndex = 4
+
+-- Title Label
+local Title = Instance.new("TextLabel", MainFrame)
+Title.Size = UDim2.new(1, 0, 0, 28)
+Title.Position = UDim2.new(0, 8, 0, 4)
+Title.Text = "god mode v1 tp.lm.script"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 12
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.ZIndex = 4
+
+-- --- SMOOTH BOUNCY MENU ANIMATION LOGIC ---
+local isOpen = false
+local isAnimating = false
+
+local function AnimateMenu(open)
+    if isAnimating then return end
+    isAnimating = true
+
+    if open then
+        MainWrapper.Visible = true
+        local scaleTween = TweenService:Create(MainScale, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1})
+        scaleTween:Play()
+        scaleTween.Completed:Wait()
+        isAnimating = false
+    else
+        local scaleTween = TweenService:Create(MainScale, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Scale = 0})
+        scaleTween:Play()
+        scaleTween.Completed:Wait()
+        MainWrapper.Visible = false
+        isAnimating = false
+    end
+end
+
+OpenBtn.MouseButton1Click:Connect(function()
+    isOpen = not isOpen
+    AnimateMenu(isOpen)
+end)
+
+CloseBtn.MouseButton1Click:Connect(function()
+    isOpen = false
+    AnimateMenu(false)
+end)
+
+-- --- CONTROLS UI CONTAINER ---
+local ContentFrame = Instance.new("Frame", MainFrame)
+ContentFrame.Size = UDim2.new(1, -16, 1, -36)
+ContentFrame.Position = UDim2.new(0, 8, 0, 32)
+ContentFrame.BackgroundTransparency = 1
+ContentFrame.ZIndex = 3
+
+-- GODMODE TOGGLE BUTTON
+local GodmodeButton = Instance.new("TextButton", ContentFrame)
+GodmodeButton.Size = UDim2.new(1, 0, 0, 35)
+GodmodeButton.Position = UDim2.new(0, 0, 0, 10)
+GodmodeButton.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+GodmodeButton.Font = Enum.Font.GothamBold
+GodmodeButton.Text = "BẤT TỬ: ON"
+GodmodeButton.TextColor3 = Color3.fromRGB(0, 255, 128)
+GodmodeButton.TextSize = 12
+GodmodeButton.ZIndex = 3
+
+local GBCorner = Instance.new("UICorner", GodmodeButton)
+GBCorner.CornerRadius = UDim.new(0, 6)
+local GBStroke = Instance.new("UIStroke", GodmodeButton)
+GBStroke.Color = Color3.fromRGB(255, 0, 0)
+GBStroke.Transparency = 0.5
+
+-- Credit Text
+local Cre = Instance.new("TextLabel", ContentFrame)
+Cre.Size = UDim2.new(1, 0, 0, 20)
+Cre.Position = UDim2.new(0, 0, 0, 55)
+Cre.BackgroundTransparency = 1
+Cre.Font = Enum.Font.GothamSemibold
+Cre.Text = "Script by WarriorRoberr"
+Cre.TextColor3 = Color3.fromRGB(140, 140, 140)
+Cre.TextSize = 10
+Cre.ZIndex = 3
+
+-- --- LOGIC CORE (GODMODE & HAZARD ERASER) ---
+local GodmodeActive = true
+local ConnectionPool = {}
+
+GodmodeButton.MouseButton1Click:Connect(function()
+    GodmodeActive = not GodmodeActive
+    if GodmodeActive then
+        GodmodeButton.Text = "BẤT TỬ: ON"
+        GodmodeButton.TextColor3 = Color3.fromRGB(0, 255, 128)
+    else
+        GodmodeButton.Text = "BẤT TỬ: OFF"
+        GodmodeButton.TextColor3 = Color3.fromRGB(255, 50, 50)
+    end
+end)
+
+local function secureCharacter(character)
+    if not character then return end
+    local humanoid = character:WaitForChild("Humanoid", 5)
+    local rootPart = character:WaitForChild("HumanoidRootPart", 5)
+    if not humanoid or not rootPart then return end
+
+    local heartbeatConn = RunService.Heartbeat:Connect(function()
+        if GodmodeActive then
+            pcall(function()
+                humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+                humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+                humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+                humanoid:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding, false)
+                humanoid.Health = humanoid.MaxHealth
+
+                for _, obj in ipairs(Workspace:GetDescendants()) do
+                    if obj:IsA("BasePart") and not obj:IsDescendantOf(character) then
+                        local nameLower = obj.Name:lower()
+                        if nameLower:find("kill") or nameLower:find("laser") or nameLower:find("death") or nameLower:find("damage") or nameLower:find("hazard") then
+                            obj.CanTouch = false
+                            obj.CanCollide = false
+                        end
+                    end
+                end
+            end)
+        end
+    end)
+    table.insert(ConnectionPool, heartbeatConn)
+end
+
+if LocalPlayer.Character then
+    task.spawn(function() secureCharacter(LocalPlayer.Character) end)
+end
+
+LocalPlayer.CharacterAdded:Connect(function(newChar)
+    for _, conn in ipairs(ConnectionPool) do
+        pcall(function() conn:Disconnect() end)
+    end
+    ConnectionPool = {}
+    task.spawn(function() secureCharacter(newChar) end)
+end)
